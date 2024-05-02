@@ -4,7 +4,22 @@ const selectedRowsContainer = document.getElementById('selected-rows');
 const pivotTableContainer = document.getElementById('pivot-table');
 let workbook;
 
-const file = 'book.xlsx';
+var url = "https://docs.google.com/spreadsheets/d/132NpYta9xqVm06Jlh-Ip-n3VxomjvOVj/edit?usp=sharing&ouid=106327186958861822886&rtpof=true&sd=true";
+
+/* set up async GET request */
+var req = new XMLHttpRequest();
+req.open("GET", url, true);
+req.responseType = "arraybuffer";
+
+req.onload = function(e) {
+  var workbook = XLSX.read(req.response);
+
+  /* DO SOMETHING WITH workbook HERE */
+};
+
+req.send();
+
+/*const file = 'book.xlsx';
 fetch(file)
     .then(response => response.arrayBuffer())
     .then(data => {
@@ -16,7 +31,7 @@ fetch(file)
             select.appendChild(option);
         });
     });
-
+*/
 select.addEventListener('change', () => {
     const selectedSheetName = select.value;
     const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[selectedSheetName], { header: 1 });
