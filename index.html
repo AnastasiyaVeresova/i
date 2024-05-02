@@ -1,0 +1,86 @@
+ <!--<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Отображение таблиц из файла Excel</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Список таблиц</h1>
+    <ul id="sheet-list">
+        <li>Таблица ячеек трансформатора 100-330</li>
+        <li>Таблица2</li>
+       
+    </ul>
+    <div id="sheet-info"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <script src="script.js"></script>
+    
+</body>
+</html>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Data Viewer</title>
+</head>
+<body>
+    <h1>Выберите лист Excel:</h1>
+    <select id="sheet-dropdown"></select>
+
+    <h2>Информация с выбранного листа:</h2>
+    <div id="sheet-info"></div>
+
+    <h2>Выбранные строки данных:</h2>
+    <table id="selected-rows"></table>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Отображение таблиц из файла Excel</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Выберите таблицу из Excel</h1>
+    <select id="table-select">
+        <option value="">Выберите таблицу</option>
+    </select>
+    
+    <div id="selected-rows"></div>
+    
+    <div id="pivot-table"></div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
