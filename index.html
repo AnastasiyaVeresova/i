@@ -88,20 +88,25 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>Display Excel Sheets in Dropdown List</title>
+    <title>Выбор строки и добавление в сводную таблицу</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <h2>Select Excel Sheet:</h2>
+        <h2>Выберите файл Excel:</h2>
         <input type="file" id="excel_file_input">
         <select id="sheet_list"></select>
         <div id="sheet_data"></div>
+        <div id="about">Подробнее</div>
+        <table id="pivot_table" border="0">
+        </table>
     </div>
 </body>
 <script>
     var sheet_list = document.getElementById('sheet_list');
     var sheet_data_div = document.getElementById('sheet_data');
+    var about_div = document.getElementById('about');
+    var pivot_table = document.getElementById('pivot_table');
     var workbook = null;
 
     var excel_file_input = document.getElementById('excel_file_input');
@@ -110,10 +115,9 @@
         var reader = new FileReader();
         reader.onload = function(e) {
             var data = new Uint8Array(e.target.result);
-            workbook = XLSX.read(data, {type: 'array'});
+            workbook = XLSX.read(data, { type: 'array' });
             var sheetNames = workbook.SheetNames;
-
-            sheet_list.innerHTML = ''; // Clear existing options
+            sheet_list.innerHTML = '';
 
             sheetNames.forEach(function(sheetName) {
                 var option = document.createElement('option');
@@ -130,6 +134,60 @@
         var selectedSheetName = sheet_list.value;
         var sheetData = XLSX.utils.sheet_to_html(workbook.Sheets[selectedSheetName]);
         sheet_data_div.innerHTML = sheetData;
+
+        var aboutText = getHiddenComments(selectedSheetName);
+        about_div.textContent = aboutText;
     });
+
+    function getHiddenComments(sheetName) {
+        var hiddenComments = '';
+        var sheet = workbook.Sheets[sheetName];
+        Object.keys(sheet).forEach(function(cell) {
+            if (cell.startsWith('!comment')) {
+                hiddenComments += sheet[cell].t + '\n';
+            }
+        });
+        return hiddenComments.trim() || 'No hidden comments available';
+    }
+
+    about_div.addEventListener('click', function() {
+        var selectedSheetName = sheet_list.value;
+        var aboutText = getHiddenComments(selectedSheetName);
+        about_div.textContent = aboutText;
+    });
+
+    pivot_table.addEventListener('click', function(e) {
+        if (e.target.classList.contains('delete-row')) {
+            var row = e.target.closest('tr');
+            pivot_table.deleteRow(row.rowIndex);
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        if (e.target.tagName === 'TD') {
+            var row = e.target.parentElement;
+            addRowToPivotTable(row);
+        }
+    });
+
+   function addRowToPivotTable(row) {
+    if (pivot_table.rows.length === 0) {
+        var headerRow = pivot_table.insertRow();
+        for (var i = 0; i < row.cells.length; i++) {
+            var headerCell = headerRow.insertCell();
+            headerCell.textContent = row.cells[i].textContent; // Use the text from cells as column headers
+        }
+    }
+
+    var newRow = pivot_table.insertRow();
+    for (var i = 0; i < row.cells.length; i++) {
+        var newCell = newRow.insertCell();
+        newCell.textContent = row.cells[i].textContent;
+    }
+    var deleteCell = newRow.insertCell();
+    deleteCell.innerHTML = '<button class="delete-row">✖</button>';
+}
+
+
 </script>
 </html>
