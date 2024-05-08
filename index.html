@@ -1,395 +1,263 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
     <meta charset="utf-8" />
-
     <title>Выбор строки и добавление в сводную таблицу</title>
-
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">   
-
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+   
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstra…"
     integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
     <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
-
-    <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full…"></script>
+    <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>  
+ 
 </head>
-
 <body>
-
     <div class="container-fluid  mt-4 mb-4 card">
-
         <h2 class="text-center mt-4 mb-4">МИНИСТЕРСТВО ЭНЕРГЕТИКИ РОССИЙСКОЙ ФЕДЕРАЦИИ
-
             ПРИКАЗ
-
             от 26 февраля 2024 г. N 131
-
             ОБ УТВЕРЖДЕНИИ УКРУПНЕННЫХ НОРМАТИВОВ ЦЕНЫ ТИПОВЫХ ТЕХНОЛОГИЧЕСКИХ РЕШЕНИЙ КАПИТАЛЬНОГО СТРОИТЕЛЬСТВА ОБЪЕКТОВ ЭЛЕКТРОЭНЕРГЕТИКИ В ЧАСТИ ОБЪЕКТОВ ЭЛЕКТРОСЕТЕВОГО ХОЗЯЙСТВА</h2>
-
         <div><input type="file" id="excel_file_input">
-
-            <select id="sheet_list" class="form-select mt-4" aria-label="Список листов" style="width: 80%"></select></div> 
-
-        <table id="sheet_data" class="table table-bordered table-hover mt-4"></table> 
-
+            <select id="sheet_list" class="form-select mt-4" aria-label="Список листов" style="width: 80%"></select></div>
+ 
+        <table id="sheet_data" class="table table-bordered table-hover mt-4"></table>
+ 
         <div id="about" class="mt-4 mb-4">Подробнее</div>
-
-        <ul id="commentsList"></ul>       
-
+        <ul id="commentsList"></ul>
+      
         <table id="pivot_table"class="table table-bordered table-hover mt-4">
-
         </table>
-
         <button onclick="ExportToExcel('xlsx')" class="btn btn-primary" type="button">Сохранить в Excel</button>
-
     </div>
-
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/…" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap…" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 </body>
-
 <script>
-
     //Эта строка получает элемент с идентификатором 'sheet_list' из HTML документа и сохраняет его в переменную sheet_list
-
-    let sheet_list = document.getElementById('sheet_list');
-
+    var sheet_list = document.getElementById('sheet_list');
     //Эта строка получает элемент с идентификатором 'sheet_data' из HTML документа и сохраняет его в переменную sheet_data_div
-
-    let sheet_data_div = document.getElementById('sheet_data');
-
+    var sheet_data_div = document.getElementById('sheet_data');
     // Эта строка получает элемент с идентификатором 'about' из HTML документа и сохраняет его в переменную about_div
-
-    let about_div = document.getElementById('about');
-
+    var about_div = document.getElementById('about');
     //Эта строка получает элемент с идентификатором 'pivot_table' из HTML документа и сохраняет его в переменную pivot_table
-
-    let pivot_table = document.getElementById('pivot_table');
-
+    var pivot_table = document.getElementById('pivot_table');
     //Эта строка инициализирует переменную  workbook значением null
-
-    let workbook = null;
-
+    var workbook = null;
     //Эта строка получает элемент с идентификатором 'excel_file_input' из HTML документа и сохраняет его в переменную excel_file_input
-
-    let excel_file_input = document.getElementById('excel_file_input'); 
-
-       //Этот код позволяет пользователю загрузить файл Excel, прочитать его содержимое, извлечь имена листов и заполнить выпадающий список этими именами для дальнейшей обработки  
-
-    //Эта строка добавляет слушатель событий к элементу  excel_file_input, который ожидает событие 'change' (т.е. когда файл выбран). Когда файл выбран, выполняется функция внутри слушателя событий    
-
+    var excel_file_input = document.getElementById('excel_file_input');
+ 
+       //Этот код позволяет пользователю загрузить файл Excel, прочитать его содержимое, извлечь имена листов и заполнить выпадающий список этими именами для дальнейшей обработки
+   
+    //Эта строка добавляет слушатель событий к элементу  excel_file_input, который ожидает событие 'change' (т.е. когда файл выбран). Когда файл выбран, выполняется функция внутри слушателя событий   
     excel_file_input.addEventListener('change', function(e) {
-
-        let file = e.target.files[0];
-
+        var file = e.target.files[0];
     //Внутри функции слушателя событий выбранный файл считывается с помощью объекта FileReader. Данные файла считываются как массив буферов, затем разбираются с помощью функции  XLSX.read из библиотеки XLSX.
-
-    let reader = new FileReader();
-
+    var reader = new FileReader();
         reader.onload = function(e) {
-
-            let data = new Uint8Array(e.target.result);
-
+            var data = new Uint8Array(e.target.result);
             workbook = XLSX.read(data, { type: 'array' });
-
             var select = document.getElementById('sheet_list');
-
+           
             sheet_list.innerHTML = '';
-
-                commentsList.innerHTML = ''; 
-
+                commentsList.innerHTML = '';
+ 
                 workbook.SheetNames.forEach(function(sheetName) {
-
                     var option = document.createElement('option');
-
                     option.value = sheetName;
-
                     option.textContent = sheetName;
-
-                    sheet_list.appendChild(option); 
-
+                    sheet_list.appendChild(option);
+ 
                       // Находим элемент select по его id
-
-                    // var select = document.getElementById("sheet_list");       
+                    // var select = document.getElementById("sheet_list");
+                   
+ 
                     // Устанавливаем первый элемент как выбранный
-
                     // select.selectedIndex = 0;
-
                 });
-
             };
-
+ 
             reader.readAsArrayBuffer(file);
-
         });
-
+ 
         sheet_list.addEventListener('change', function() {
-
             var selectedSheet = sheet_list.value;
-
             var worksheet = workbook.Sheets[selectedSheet];
-
             var comments = worksheet['!comments'];
-
-            commentsList.innerHTML = ''; 
-
+            commentsList.innerHTML = '';
+ 
             if (comments) {
-
                 Object.keys(comments).forEach(function(cell) {
-
                     var comment = comments[cell].c;
-
                     var listItem = document.createElement('li');
-
                     listItem.textContent = 'Comment in cell ' + cell + ': ' + comment;
-
                     commentsList.appendChild(listItem);
-
                 });
-
             }
-
-        }); 
-
-    //Этот код  для обработки изменения выбранного листа в выпадающем списке sheet_list, а также для отображения скрытых комментариев в элементе about_div 
-
+        });     
+ 
+    //Этот код  для обработки изменения выбранного листа в выпадающем списке sheet_list, а также для отображения скрытых комментариев в элементе about_div
+ 
     // Этот код добавляет слушатель событий к элементу sheet_list, который реагирует на изменение выбранного листа в списке. Когда выбран новый лист, выполняется функция внутри слушателя событий
-
     sheet_list.addEventListener('change', function() {
-
     // Эта строка сохраняет значение выбранного листа из выпадающего списка в переменную  selectedSheetName
-
-    let selectedSheetName = sheet_list.value;
-
+    var selectedSheetName = sheet_list.value;
     //Здесь данные выбранного листа из рабочей книги преобразуются в HTML с помощью функции XLSX.utils.sheet_to_html, и результат сохраняется в переменной sheetData
-
         // var sheetData = XLSX.utils.sheet_to_html(workbook.Sheets[selectedSheetName]);
-
-    //Получаем данные первого листа в формате JSON с помощью функции SheetJSsheet_to_json(), передав имя    
-
-    let sheet_data = XLSX.utils.sheet_to_json(workbook.Sheets[selectedSheetName], {header:1}); 
-
-    //Этот код обновляет содержимое элемента sheet_data_div с данными выбранного листа, отображая его в виде HTML
-
-        // sheet_data_div.innerHTML = sheetData;
-
-    //Эта строка вызывает функцию  getHiddenComments с выбранным именем листа и сохраняет результат в переменной aboutText
-
-    let aboutText = getHiddenComments(selectedSheetName);
-
-    // Этот код обновляет содержимое элемента about_div с текстом скрытых комментариев
-
-        about_div.textContent = aboutText; 
-
-        if(sheet_data.length > 0)
-
-        {
-
-            let table_output = '<table class="table table-striped table-bordered">';
-
-            for(let row = 0; row < sheet_data.length; row++)
-
-            {
-
-                table_output += '<tr>';
-
-                for(let cell = 0; cell < sheet_data[row].length; cell++)
-
-                {
-
-                    if(row == 0)
-
-                    {
-
-                        table_output += '<th>'+sheet_data[row][cell]+'</th>';
-
-                    }
-
-                    else
-
-                    {
-
-                        table_output += '<td>'+sheet_data[row][cell]+'</td>';
-
-                    }
-
-                }
-
-                table_output += '</tr>';
-
+    //Получаем данные первого листа в формате JSON с помощью функции SheetJSsheet_to_json(), передав имя   
+    var sheet_data = XLSX.utils.sheet_to_json(workbook.Sheets[selectedSheetName], { header: 1, raw: true, cellDates: false });
+ 
+     // Форматирование числовых значений с разделителем запятой
+     sheet_data.forEach(function(row) {
+        row.forEach(function(cell, index) {
+            if (typeof cell === 'number') {
+                row[index] = cell.toLocaleString('ru-RU');
             }
-
-            table_output += '</table>';
-
-            document.getElementById('sheet_data').innerHTML = table_output;
-
-        }      
-
-    });
-    
-    // Эта функция получает скрытые комментарии для выбранного листа из рабочей книги и возвращает их в виде строки
-
-    function getHiddenComments(sheetName) {
-
-        let hiddenComments = '';
-
-        let sheet = workbook.Sheets[sheetName];
-
-        Object.keys(sheet).forEach(function(cell) {
-
-            if (cell.startsWith('!comment')) {
-
-                hiddenComments += sheet[cell].t + '\n';
-
-            }
-
         });
-
-        return hiddenComments.trim() || 'No hidden comments available';
-
-    } 
-
-    //Этот код добавляет слушатель событий к элементу about_div, который реагирует на клик по элементу. При клике текст скрытых комментариев обновляется
-
-    about_div.addEventListener('click', function() {
-
-        let selectedSheetName = sheet_list.value;
-
-        let aboutText = getHiddenComments(selectedSheetName);
-
-        about_div.textContent = aboutText;
-
-    }); 
-
-    //Этот фрагмент кода добавляет прослушиватель событий click к элементу pivot_table. Когда в pivot_table происходит событие click, код проверяет, имеет ли выбранный элемент класс 'delete-row'. Если выбранный элемент имеет этот класс, это означает, что пользователь хочет удалить строку из таблицы
-
-    pivot_table.addEventListener('click', function(e) {
-
-        if (e.target.classList.contains('delete-row')) {
-
-    //Этот код находит ближайший элемент <tr> (строка таблицы) к выбранному элементу и сохраняет его в переменной row
-
-            var row = e.target.closest('tr');
-
-    //Эта строка удаляет строку из сводной таблицы на основе индекса строки, на которую был сделан щелчок
-
-            pivot_table.deleteRow(row.rowIndex);          
-
-        }
-
-        if (pivot_table.rows.length === 1) {
-
-            pivot_table.deleteRow(0);
-
-    } 
-
-    }); 
-
-    //Этот код является обработчиком события клика на документе. Он проверяет, был ли кликнут элемент с тегом 'TD' (ячейка таблицы). Если это так, то код получает родительскую строку (row) данной ячейки и добавляет ее в сводную таблицу (pivot table)
-
-    document.getElementById('sheet_data').addEventListener('click', function(e) {
-
-        if (e.target.tagName === 'TD') {
-
-            var row = e.target.parentElement.innerHTML;
-
-    // Получаем строку заголовка для сводной таблицы
-
-            var newHeader = document.getElementById('sheet_data').rows[0].innerHTML;
-
-        if (pivot_table.rows.length === 0) {
-
-            headerRow = pivot_table.insertRow();
-
-            headerRow.innerHTML = newHeader;
-
-        }
-
-        newRow = pivot_table.insertRow();
-
-        newRow.innerHTML = row;    
-
-    // Добавляем ячейку кнопки удаления
-
-        var deleteCell = newRow.insertCell();
-
-        deleteCell.innerHTML = '<button class="delete-row">✖</button>'; 
-
-    for (var i = 0; i < row.cells.length; i++) {
-
-        var newCell = newRow.insertCell();
-
-        var headerText = newHeader.cells[i].textContent;
-
-        newCell.textContent = row.cells[i].textContent;
-
-       
-
-    // Проверяем, существует ли заголовок уже в сводной таблице
-
-        var columnIndex = -1;
-
-        for (var j = 0; j < newHeader.cells.length; j++) {
-
-            if (newHeader.cells[j].textContent === headerText) {
-
-                columnIndex = j;
-
-                break;
-
-            }
-
-        }        
-
-        // Если заголовок существует, вставляем значение в соответствующий столбец
-
-        if (columnIndex !== -1) {
-
-            newRow.cells[columnIndex].textContent = row.cells[i].textContent;
-
-        } else {
-
-            // Если заголовок не существует, создаем новый столбец с заголовком и вставляем значение
-
-            var newHeaderCell = newHeader.insertCell();
-
-            newHeaderCell.textContent = headerText;
-
-            newCell.textContent = row.cells[i].textContent;
-
-        }
-
-    }     
-
-        }     
-
     });
-
+ 
+    console.log(sheet_data);
+ 
+    //Этот код обновляет содержимое элемента sheet_data_div с данными выбранного листа, отображая его в виде HTML
+        // sheet_data_div.innerHTML = sheetData;
+    //Эта строка вызывает функцию  getHiddenComments с выбранным именем листа и сохраняет результат в переменной aboutText
+    var aboutText = getHiddenComments(selectedSheetName);
+    // Этот код обновляет содержимое элемента about_div с текстом скрытых комментариев
+        about_div.textContent = aboutText;
+ 
+        if(sheet_data.length > 0)
+        {
+            var table_output = '<table class="table table-striped table-bordered">';
+            for(var row = 0; row < sheet_data.length; row++)
+            {
+                table_output += '<tr>';
+                for(var cell = 0; cell < sheet_data[row].length; cell++)
+                {
+                    if(row == 0)
+                    {
+                        table_output += '<th>'+sheet_data[row][cell]+'</th>';
+                    }
+                    else
+                    {
+                        table_output += '<td>'+sheet_data[row][cell]+'</td>';
+                    }
+                }
+                table_output += '</tr>';
+            }
+            table_output += '</table>';
+            document.getElementById('sheet_data').innerHTML = table_output;
+        }
+       
+    });
+ 
+    // Эта функция получает скрытые комментарии для выбранного листа из рабочей книги и возвращает их в виде строки
+    function getHiddenComments(sheetName) {
+        var hiddenComments = '';
+        var sheet = workbook.Sheets[sheetName];
+        Object.keys(sheet).forEach(function(cell) {
+            if (cell.startsWith('!comment')) {
+                hiddenComments += sheet[cell].t + '\n';
+            }
+        });
+        return hiddenComments.trim() || 'No hidden comments available';
+    }
+ 
+    //Этот код добавляет слушатель событий к элементу about_div, который реагирует на клик по элементу. При клике текст скрытых комментариев обновляется
+    about_div.addEventListener('click', function() {
+        var selectedSheetName = sheet_list.value;
+        var aboutText = getHiddenComments(selectedSheetName);
+        about_div.textContent = aboutText;
+    });
+ 
+    //Этот фрагмент кода добавляет прослушиватель событий click к элементу pivot_table. Когда в pivot_table происходит событие click, код проверяет, имеет ли выбранный элемент класс 'devare-row'. Если выбранный элемент имеет этот класс, это означает, что пользователь хочет удалить строку из таблицы
+    pivot_table.addEventListener('click', function(e) {
+        if (e.target.classList.contains('delete-row')) {
+    //Этот код находит ближайший элемент <tr> (строка таблицы) к выбранному элементу и сохраняет его в переменной row
+            var row = e.target.closest('tr');
+    //Эта строка удаляет строку из сводной таблицы на основе индекса строки, на которую был сделан щелчок
+            pivot_table.deleteRow(row.rowIndex);
+           
+        }
+        if (pivot_table.rows.length === 1) {
+            pivot_table.deleteRow(0);
+    }
+ 
+    });
+ 
+    //Этот код является обработчиком события клика на документе. Он проверяет, был ли кликнут элемент с тегом 'TD' (ячейка таблицы). Если это так, то код получает родительскую строку (row) данной ячейки и добавляет ее в сводную таблицу (pivot table)
+    document.getElementById('sheet_data').addEventListener('click', function(e) {
+        if (e.target.tagName === 'TD') {
+            var row = e.target.parentElement.innerHTML;
+    // Получаем строку заголовка для сводной таблицы
+            var newHeader = document.getElementById('sheet_data').rows[0].innerHTML;
+        if (pivot_table.rows.length === 0) {
+            headerRow = pivot_table.insertRow();
+            headerRow.innerHTML = newHeader;
+        }
+        newRow = pivot_table.insertRow();
+        newRow.innerHTML = row;   
+    // Добавляем ячейку кнопки удаления
+        var devareCell = newRow.insertCell();
+        devareCell.innerHTML = '<button class="delete-row">✖</button>';
+ 
+    for (var i = 0; i < row.cells.length; i++) {
+        var newCell = newRow.insertCell();
+        var headerText = newHeader.cells[i].textContent;
+        newCell.textContent = row.cells[i].textContent;
+       
+    // Проверяем, существует ли заголовок уже в сводной таблице
+        var columnIndex = -1;
+        for (var j = 0; j < newHeader.cells.length; j++) {
+            if (newHeader.cells[j].textContent === headerText) {
+                columnIndex = j;
+                break;
+            }
+        }       
+        // Если заголовок существует, вставляем значение в соответствующий столбец
+        if (columnIndex !== -1) {
+            newRow.cells[columnIndex].textContent = row.cells[i].textContent;
+        } else {
+            // Если заголовок не существует, создаем новый столбец с заголовком и вставляем значение
+            var newHeaderCell = newHeader.insertCell();
+            newHeaderCell.textContent = headerText;
+            newCell.textContent = row.cells[i].textContent;
+        }
+    }   
+ 
+        }
+       
+    });
     function ExportToExcel(type, fn, dl) {
-
-    var elt = document.getElementById('pivot_table');
-
-    var wb = XLSX.utils.table_to_book(elt, { sheet: "sheet1", raw: true });
-
-    return dl ?
-
-        XLSX.write(wb, { bookType: type, bookSST: true, type: 'base64' }) :
-
-        XLSX.writeFile(wb, fn || ('Pivot_table.' + (type || 'xlsx')));
-
-} 
-
+        var elt = document.getElementById('pivot_table');
+        var wb = XLSX.utils.table_to_book(elt, { sheet: "sheet1", raw: true });
+        var ws = wb.Sheets[wb.SheetNames[0]];
+           
+        // Удаление последней колонки из данных
+        var range = XLSX.utils.decode_range(ws['!ref']);
+        range.e.c--; // Уменьшаем номер последней колонки
+           
+        // // Удаляем данные из последней колонки
+        // for (var R = range.s.r; R <= range.e.r; ++R) {
+        //     var cell_address = {c:range.e.c, r:R};
+        //     devare ws[XLSX.utils.encode_cell(cell_address)];
+        // }
+           
+        ws['!ref'] = XLSX.utils.encode_range(range);
+           
+        var wbOut = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wbOut, ws, ws.name);
+ 
+        // XLSX.write(wb, { bookType: type, bookSST: true, type: 'base64' }) :
+        // XLSX.writeFile(wb, fn || ('Pivot_table.' + (type || 'xlsx')));
+        var fileName = prompt("Введите имя файла для сохранения", "pivot_table.xlsx");
+            if (fileName) {
+                XLSX.writeFile(wb, fn || ('Pivot_table.' + (type || 'xlsx')));
+                alert("Файл успешно сохранен: " + fileName);
+            } else {
+                alert("Сохранение отменено.");
+            }
+        }
+ 
 </script>
-
 </html>
